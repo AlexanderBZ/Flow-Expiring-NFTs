@@ -52,13 +52,13 @@ pub contract TimeExpiringNFT: NonFungibleToken {
     }
   }
 
-  pub resource interface CryptoRaptorsCollectionPublic {
+  pub resource interface TimeExpiringNFTCollectionPublic {
     pub fun deposit(token: @NonFungibleToken.NFT)
     pub fun getIDs(): [UInt64]
     pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
   }
 
-  pub resource Collection: CryptoRaptorsCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+  pub resource Collection: TimeExpiringNFTCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
     pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
     init () {
@@ -78,7 +78,7 @@ pub contract TimeExpiringNFT: NonFungibleToken {
     }
 
     pub fun deposit(token: @NonFungibleToken.NFT) {
-      let token <- token as! @CryptoRaptors.NFT
+      let token <- token as! @TimeExpiringNFT.NFT
 
       let id: UInt64 = token.id
 
@@ -95,8 +95,8 @@ pub contract TimeExpiringNFT: NonFungibleToken {
 
     pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
       let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
-      let CryptoRaptors = nft as! &CryptoRaptors.NFT
-      return CryptoRaptors as &AnyResource{MetadataViews.Resolver}
+      let TimeExpiringNFT = nft as! &TimeExpiringNFT.NFT
+      return TimeExpiringNFT as &AnyResource{MetadataViews.Resolver}
     }
 
     destroy() {
@@ -115,7 +115,7 @@ pub contract TimeExpiringNFT: NonFungibleToken {
     thumbnail: String,
   ) {
     var newNFT <- create NFT(
-      id: CryptoRaptors.totalSupply,
+      id: TimeExpiringNFT.totalSupply,
       name: name,
       description: description,
       thumbnail: thumbnail
@@ -123,19 +123,19 @@ pub contract TimeExpiringNFT: NonFungibleToken {
 
     recipient.deposit(token: <-newNFT)
 
-    CryptoRaptors.totalSupply = CryptoRaptors.totalSupply + UInt64(1)
+    TimeExpiringNFT.totalSupply = TimeExpiringNFT.totalSupply + UInt64(1)
   }
 
   init() {
     self.totalSupply = 0
 
-    self.CollectionStoragePath = /storage/CryptoRaptorsCollection
-    self.CollectionPublicPath = /public/CryptoRaptorsCollection
+    self.CollectionStoragePath = /storage/TimeExpiringNFTCollection
+    self.CollectionPublicPath = /public/TimeExpiringNFTCollection
 
     let collection <- create Collection()
     self.account.save(<-collection, to: self.CollectionStoragePath)
 
-    self.account.link<&CryptoRaptors.Collection{NonFungibleToken.CollectionPublic, CryptoRaptors.CryptoRaptorsCollectionPublic, MetadataViews.ResolverCollection}>(
+    self.account.link<&TimeExpiringNFT.Collection{NonFungibleToken.CollectionPublic, TimeExpiringNFT.TimeExpiringNFTCollectionPublic, MetadataViews.ResolverCollection}>(
       self.CollectionPublicPath,
       target: self.CollectionStoragePath
     )
